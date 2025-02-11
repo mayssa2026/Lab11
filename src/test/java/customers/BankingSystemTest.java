@@ -1,116 +1,79 @@
-
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-import java.util.Arrays;
-import java.util.List;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import services.AccountService;
-import services.CustomerService;
-import messaging.NotificationService;
-
 package customers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import bank.domain.Account;
+import bank.domain.AccountEntry;
+import bank.domain.Customer;
 
-@SpringBootTest
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
 class BankingSystemTest {
 
-	@Mock
-	private Account account;
+    private Account account1;
+    private Account account2;
+    private Customer customer;
+    private Customer customer2;
+    
+    
+        @BeforeEach
+        void setUp() {
+            customer = new Customer("John Doe");
+            account1 = new Account(1);
+            account1.setCustomer(customer);
+            account1.deposit(1000.0);
+            customer2 = new Customer("John Doe2");
+            account2 = new Account(2);
+            account2.deposit(1000.0);
+            account2.setCustomer(customer2);
+    }
 
-	@Mock
-	private AccountEntry accountEntry;
+    @Test
+    void testAccountCreation() {
+        assertNotNull(account1);
+        assertEquals(1000.0, account1.getBalance());
+    }
 
-	@Mock
-	private Customer customer;
+    @Test
+    void testDepositFunctionality() {
+        account1.deposit(500.0);
+        assertEquals(1500.0, account1.getBalance());
+    }
 
-	@Mock
-	private AccountService accountService;
+    @Test
+    void testWithdrawalFunctionality() {
+        account1.withdraw(200.0);
+        assertEquals(800.0, account1.getBalance());
+    }
 
-	@Mock
-	private CustomerService customerService;
+    @Test
+    void testInsufficientFunds() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            account1.withdraw(2000.0);
+        });
+        assertEquals("Insufficient funds", exception.getMessage());
+    }
 
-	@Mock
-	private NotificationService notificationService;
+    @Test
+    void testTransactionHistory() {
+        account1.deposit(500.0);
+        account1.withdraw(200.0);
+        List<AccountEntry> transactions = (List<AccountEntry>) account1.getEntryList();
+        assertEquals(3, transactions.size());
+    }
 
-	@InjectMocks
-	private BankingSystemTest bankingSystemTest;
+    @Test
+    void testCustomerCreation() {
+        assertNotNull(customer);
+        assertEquals("John Doe", customer.getName());
+    }
 
-	public BankingSystemTest() {
-		MockitoAnnotations.openMocks(this);
-	}
-
-	@Test
-	void contextLoads() {
-	}
-
-	@Test
-	void testAccountGetBalance() {
-		when(account.getBalance()).thenReturn(1000.0);
-		assertEquals(1000.0, account.getBalance());
-	}
-
-	@Test
-	void testAccountEntryGetAmount() {
-		when(accountEntry.getAmount()).thenReturn(200.0);
-		assertEquals(200.0, accountEntry.getAmount());
-	}
-
-	@Test
-	void testCustomerGetName() {
-		when(customer.getName()).thenReturn("John Doe");
-		assertEquals("John Doe", customer.getName());
-	}
-
-	@Test
-	void testCustomerGetAccounts() {
-		List<Account> accounts = Arrays.asList(new Account(), new Account());
-		when(customer.getAccounts()).thenReturn(accounts);
-		assertEquals(2, customer.getAccounts().size());
-	}
-
-	@Test
-	void testAccountServiceCreateAccount() {
-		Account newAccount = new Account();
-		when(accountService.createAccount("12345")).thenReturn(newAccount);
-		assertEquals(newAccount, accountService.createAccount("12345"));
-	}
-
-	@Test
-	void testCustomerServiceAddCustomer() {
-		Customer newCustomer = new Customer();
-		when(customerService.addCustomer("Jane Doe")).thenReturn(newCustomer);
-		assertEquals(newCustomer, customerService.addCustomer("Jane Doe"));
-	}
-
-	@Test
-	void testNotificationServiceSendNotification() {
-		String message = "Account created successfully";
-		when(notificationService.sendNotification("12345", message)).thenReturn(true);
-		assertEquals(true, notificationService.sendNotification("12345", message));
-	}
-
-	@Test
-	void testAccountServiceGetAccountDetails() {
-		Account accountDetails = new Account();
-		when(accountService.getAccountDetails("12345")).thenReturn(accountDetails);
-		assertEquals(accountDetails, accountService.getAccountDetails("12345"));
-	}
-
-	@Test
-	void testCustomerServiceGetCustomerDetails() {
-		Customer customerDetails = new Customer();
-		when(customerService.getCustomerDetails("Jane Doe")).thenReturn(customerDetails);
-		assertEquals(customerDetails, customerService.getCustomerDetails("Jane Doe"));
-	}
-
-	@Test
-	void testNotificationServiceSendAlert() {
-		String alert = "Low balance alert";
-		when(notificationService.sendAlert("12345", alert)).thenReturn(true);
-		assertEquals(true, notificationService.sendAlert("12345", alert));
-	}
+    @Test
+    void testTransferBetweenAccounts() {
+        account1.transferFunds(account2, 300, null);
+        assertEquals(700.0, account1.getBalance());
+        assertEquals(1300.0, account2.getBalance());
+    }
 }
