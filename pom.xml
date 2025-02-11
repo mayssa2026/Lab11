@@ -8,11 +8,11 @@
 		<version>3.3.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>lab11</groupId>
-	<artifactId>Lab11PartBSolution</artifactId>
+	<groupId>BankingSystem</groupId>
+	<artifactId>BankingSystem</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Lab11PartBSolution</name>
-	<description>Lab11PartBSolution</description>
+	<name>BankingSystem</name>
+	<description>BankingSystem</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
@@ -63,6 +63,12 @@
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
 		</dependency>
+		<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>4.0.0</version>
+				<scope>test</scope>
+			</dependency>
 	</dependencies>
 
 	<build>
